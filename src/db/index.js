@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-//import {dbName} from "../constants.js";
+//import DB_NAME from "../constants.js";
 const dbName = 'chai-code-practise'
 
 const connectDB = async ()=>{
