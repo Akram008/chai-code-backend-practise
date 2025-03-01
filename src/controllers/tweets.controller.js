@@ -38,6 +38,14 @@ const getUserTweets = asyncHandler(async(req, res)=>{
 const updateTweet = asyncHandler(async(req, res)=>{
     const {tweetId} = req.params 
     const {content} = req.body
+    const userId = req.user._id
+
+    const tweet = await Tweet.findById(tweetId)
+
+    if (tweet.owner.toString() !== userId.toString()) {
+        throw new ApiError(403, 'Unauthorized user!')
+    }
+    
 
     const updatedTweet = await Tweet.findByIdAndUpdate(
         tweetId, 
