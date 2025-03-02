@@ -43,10 +43,9 @@ const updateTweet = asyncHandler(async(req, res)=>{
     const tweet = await Tweet.findById(tweetId)
 
     if (tweet.owner.toString() !== userId.toString()) {
-        throw new ApiError(403, 'Unauthorized user!')
+        throw new ApiError(403, 'You do not have permission to update this tweet!')
     }
     
-
     const updatedTweet = await Tweet.findByIdAndUpdate(
         tweetId, 
         {
@@ -66,4 +65,21 @@ const updateTweet = asyncHandler(async(req, res)=>{
     .json(new ApiResponse(200, updatedTweet, 'Tweet updated Successfully!'))
 })
 
-export {createTweet, getUserTweets, updateTweet}
+const deleteTweet = asyncHandler(async(req, res)=>{
+    const {tweetId} = req.params 
+    const userId = req.user._id 
+
+    const tweet = await Tweet.findById(tweetId)
+
+    if (tweet.owner.toString() !== userId.toString()) {
+        throw new ApiError(403, 'You do not have permission to delete this tweet!')
+    }
+
+    await Tweet.findByIdAndDelete(tweetId)
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {}, 'Tweet has been deleted successfully!'))
+})
+
+export {createTweet, getUserTweets, updateTweet, deleteTweet}
