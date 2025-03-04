@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Likes } from "../models/likes.model.js";
+import { Comment } from '../models/comments.model.js'
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -34,6 +35,37 @@ const toggleVideoLike = asyncHandler(async(req, res)=>{
    
 })
 
+const toggleCommentLike = asyncHandler(async(req, res)=>{
+    const {commentId} = req.params 
+    const userId = req.user._id 
+
+    const comment = await Likes.findOne({comment: commentId, likedBy: userId}) 
+    if (!comment) {
+        const like = await Likes.create({
+            comment: commentId, 
+            likedBy: userId
+        })
+
+        const createdLike = await Likes.findById(like._id)
+        if (!createdLike) {
+            throw new ApiError(404, 'Something went wrong while liking the comment!')
+        }
+
+        return res
+        .status(200)
+        .json(new ApiResponse(200, createdLike, 'Comment is Liked!'))
+    }
+
+    const deletedLike = await Likes.findByIdAndDelete(comment._id)
+    if (!deletedLike) {
+        throw new ApiError(404, 'Something went wrong while unliking the comment!')
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {}, 'Comment is Unliked!'))
+})
+
 const getVideoLikes = asyncHandler(async(req, res)=>{
     const {videoId} = req.params 
 
@@ -51,4 +83,5 @@ const getVideoLikes = asyncHandler(async(req, res)=>{
     .json(new ApiResponse(200, tLikes, 'Total Likes on this video are fetched!'))
 })
 
-export {toggleVideoLike, getVideoLikes}
+
+export {toggleVideoLike, toggleCommentLike ,getVideoLikes}
